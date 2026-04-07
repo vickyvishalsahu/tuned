@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Radio
 
-## Getting Started
+**One channel. No choices. Just listen.**
 
-First, run the development server:
+Radio is a context-aware music player that reads your moment — time of day, where you are, how you're moving — and plays music that fits. No playlists. No algorithms you have to train. No infinite scroll of options. You press play, and the right thing happens.
+
+Built on Spotify. Requires a Premium account.
+
+---
+
+## How it works
+
+1. Sign in with Spotify
+2. Radio reads your listening history and current context
+3. Press play
+4. Music starts. You don't pick what's next — we do.
+
+Every track played is saved to a **Radio** playlist on your Spotify account.
+
+## The player
+
+The interface is one screen. Full-screen, ambient, designed to disappear.
+
+- Album art with a slow-shifting color backdrop
+- Artist and track name, nothing else
+- A thin progress bar with no timestamps
+- Rotating quotes — music, poetry, philosophy
+- A subtle context badge that hints at what Radio sees
+
+No skip button. No queue. No settings. This is a mood object, not a music app.
+
+## Context engine
+
+Radio uses simple signals to shape what plays:
+
+| Signal | Example |
+|--------|---------|
+| Time of day | Slow mornings, energetic afternoons |
+| Day of week | Weekday focus vs. weekend night energy |
+| Location | Home, commuting, somewhere new |
+| Weather | Rain shifts things down, sun opens them up |
+
+These signals map to Spotify's audio features — energy, valence, tempo, acousticness — and combine with your taste profile to generate recommendations that feel right without you lifting a finger.
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create a `.env.local` file:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+SPOTIFY_CLIENT_ID=<your-spotify-app-client-id>
+SPOTIFY_CLIENT_SECRET=<your-spotify-app-client-secret>
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+You'll need a [Spotify Developer App](https://developer.spotify.com/dashboard) with `http://localhost:3000/api/auth/spotify/callback` added as a redirect URI.
 
-## Learn More
+```bash
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [localhost:3000](http://localhost:3000).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Next.js 15 / React 19 / TypeScript / Tailwind CSS / Spotify Web Playback SDK
 
-## Deploy on Vercel
+## Status
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Early MVP. The player UI is built. Spotify auth flow is wired. The context engine and live playback integration are next.
