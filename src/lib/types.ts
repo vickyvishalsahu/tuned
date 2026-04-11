@@ -1,18 +1,18 @@
-export interface Track {
+export type Track = {
   id: string;
   title: string;
   artist: string;
   albumArtUrl: string;
   durationMs: number;
-}
+};
 
-export interface Quote {
+export type Quote = {
   text: string;
   author: string;
-}
+};
 
-export interface DominantColor {
+export type DominantColor = {
   r: number;
   g: number;
   b: number;
-}
+};
