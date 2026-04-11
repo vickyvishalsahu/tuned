@@ -1,7 +1,7 @@
 export default function SpotifyAuthButton() {
   return (
     <a
-      href="/api/auth/spotify"
+      href={`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/spotify`}
       className="group relative inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-8 py-4 font-body text-sm font-medium tracking-wide text-white/90 transition-all duration-300 hover:border-white/20 hover:bg-white/10"
     >
       <svg
