@@ -11,13 +11,8 @@ export async function GET(request: NextRequest) {
   const cookieStore = await cookies();
   const storedState = cookieStore.get("spotify_auth_state")?.value;
 
-  // Clean up state cookie
-  cookieStore.delete("spotify_auth_state");
-
   if (error) {
-    return NextResponse.redirect(
-      new URL(`/?error=${encodeURIComponent(error)}`, request.url)
-    );
+    return NextResponse.redirect(new URL(`/?error=${encodeURIComponent(error)}`, request.url));
   }
 
   if (!code || !state || state !== storedState) {
@@ -27,23 +22,26 @@ export async function GET(request: NextRequest) {
   try {
     const tokens = await exchangeCodeForTokens(code);
 
-    cookieStore.set("spotify_access_token", tokens.access_token, {
-      httpOnly: true,
+    const response = NextResponse.redirect(new URL("/radio", request.url));
+
+    response.cookies.delete("spotify_auth_state");
+
+    response.cookies.set("spotify_access_token", tokens.access_token, {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: tokens.expires_in,
       path: "/",
     });
 
-    cookieStore.set("spotify_refresh_token", tokens.refresh_token, {
+    response.cookies.set("spotify_refresh_token", tokens.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
       path: "/",
     });
 
-    return NextResponse.redirect(new URL("/radio", request.url));
+    return response;
   } catch {
     return NextResponse.redirect(new URL("/?error=token_exchange", request.url));
   }

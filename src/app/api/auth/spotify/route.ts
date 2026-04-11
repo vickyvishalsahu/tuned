@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { getSpotifyAuthUrl } from "@/lib/spotify/auth";
 
 export async function GET() {
   const state = crypto.randomUUID();
-  const cookieStore = await cookies();
-  cookieStore.set("spotify_auth_state", state, {
+  const response = NextResponse.redirect(getSpotifyAuthUrl(state));
+
+  response.cookies.set("spotify_auth_state", state, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -13,5 +13,5 @@ export async function GET() {
     path: "/",
   });
 
-  return NextResponse.redirect(getSpotifyAuthUrl(state));
+  return response;
 }
