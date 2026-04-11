@@ -1,7 +1,7 @@
 import type { DominantColor } from "./types";
 
-export function extractDominantColor(imageUrl: string): Promise<DominantColor> {
-  return new Promise((resolve) => {
+export const extractDominantColor = (imageUrl: string): Promise<DominantColor> =>
+  new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
 
@@ -13,7 +13,6 @@ export function extractDominantColor(imageUrl: string): Promise<DominantColor> {
         return;
       }
 
-      // Scale down for performance
       const size = 50;
       canvas.width = size;
       canvas.height = size;
@@ -27,12 +26,10 @@ export function extractDominantColor(imageUrl: string): Promise<DominantColor> {
       let totalB = 0;
       let count = 0;
 
-      // Sample every 4th pixel for speed, skip very dark and very bright pixels
       for (let i = 0; i < pixels.length; i += 16) {
         const r = pixels[i];
         const g = pixels[i + 1];
         const b = pixels[i + 2];
-
         const brightness = (r + g + b) / 3;
         if (brightness > 30 && brightness < 220) {
           totalR += r;
@@ -54,10 +51,6 @@ export function extractDominantColor(imageUrl: string): Promise<DominantColor> {
       });
     };
 
-    img.onerror = () => {
-      resolve({ r: 30, g: 20, b: 40 });
-    };
-
+    img.onerror = () => resolve({ r: 30, g: 20, b: 40 });
     img.src = imageUrl;
   });
-}

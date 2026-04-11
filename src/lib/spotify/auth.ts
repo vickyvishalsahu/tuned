@@ -9,7 +9,7 @@ const SCOPES = [
   "user-read-playback-state",
 ].join(" ");
 
-export function getSpotifyAuthUrl(state: string) {
+export const getSpotifyAuthUrl = (state: string) => {
   const params = new URLSearchParams({
     response_type: "code",
     client_id: process.env.SPOTIFY_CLIENT_ID!,
@@ -19,9 +19,9 @@ export function getSpotifyAuthUrl(state: string) {
   });
 
   return `https://accounts.spotify.com/authorize?${params.toString()}`;
-}
+};
 
-export async function exchangeCodeForTokens(code: string) {
+export const exchangeCodeForTokens = async (code: string) => {
   const res = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
     headers: {
@@ -37,9 +37,7 @@ export async function exchangeCodeForTokens(code: string) {
     }),
   });
 
-  if (!res.ok) {
-    throw new Error(`Spotify token exchange failed: ${res.status}`);
-  }
+  if (!res.ok) throw new Error(`Spotify token exchange failed: ${res.status}`);
 
   return res.json() as Promise<{
     access_token: string;
@@ -47,4 +45,4 @@ export async function exchangeCodeForTokens(code: string) {
     expires_in: number;
     token_type: string;
   }>;
-}
+};
