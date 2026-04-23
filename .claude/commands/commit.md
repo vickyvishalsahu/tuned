@@ -7,20 +7,20 @@ disable-model-invocation: true
 
 Analyze all current changes and create a well-crafted conventional commit.
 
-## Commit philosophy
+## Commit philosophy — non-negotiable
 
-**One logical change per commit.** Before doing anything, ask: do these changes belong together, or are they two separate things that happen to be edited at the same time?
+**One file or one logical unit, committed immediately when it works.**
 
-Signs a changeset should be split:
-- You'd describe it with "and" ("move files and add new feature")
-- Two different commit types apply (e.g. `ref` + `feat`)
-- Rolling back one part without the other would make sense
+- Max ~40 changed lines per commit (generated files like lock files are exempt)
+- Commit as you go — the moment a piece compiles or a fix works, commit it
+- Never build multiple things then commit at the end of a session
+- If you'd describe the commit using "and" → it must be split
 
-If it should be split, stage and commit each part separately — do not bundle them.
+This rule exists because it has been violated repeatedly. It is not a guideline.
 
 **Messages must be minimal and clean:**
 - Subject line ≤ 50 chars (hard cap 72)
-- No filler: "update", "changes", "misc", "stuff", "various fixes" are banned
+- No filler words: "update", "changes", "misc", "stuff", "various fixes" are banned
 - No body unless the *why* is genuinely non-obvious from the diff
 - Never mention Claude, AI, tools, or assistants in any part of the message
 
