@@ -7,58 +7,80 @@ disable-model-invocation: true
 
 Analyze all current changes and create a well-crafted conventional commit.
 
-## Instructions
+## Commit philosophy
 
-When this command is run:
+**One logical change per commit.** Before doing anything, ask: do these changes belong together, or are they two separate things that happen to be edited at the same time?
+
+Signs a changeset should be split:
+- You'd describe it with "and" ("move files and add new feature")
+- Two different commit types apply (e.g. `ref` + `feat`)
+- Rolling back one part without the other would make sense
+
+If it should be split, stage and commit each part separately — do not bundle them.
+
+**Messages must be minimal and clean:**
+- Subject line ≤ 50 chars (hard cap 72)
+- No filler: "update", "changes", "misc", "stuff", "various fixes" are banned
+- No body unless the *why* is genuinely non-obvious from the diff
+- Never mention Claude, AI, tools, or assistants in any part of the message
+
+## Instructions
 
 ### Phase 1: Analyze Changes
 
-1. **Gather context** (run in parallel):
-   - `git status` to see all changed, staged, and untracked files
-   - `git diff` to see unstaged changes
-   - `git diff --cached` to see staged changes
-   - `git log --oneline -10` to see recent commit style
+Run in parallel:
+- `git status` — all changed, staged, and untracked files
+- `git diff` — unstaged changes
+- `git diff --cached` — staged changes
+- `git log --oneline -10` — recent commit style
 
-2. **Identify relevant files**:
-   - Determine which changed files should be committed
-   - Exclude files that likely contain secrets (`.env`, `credentials.json`, etc.)
-   - Flag any suspicious files and ask the user before including them
+Identify relevant files:
+- Exclude `.env`, `credentials.json`, secrets — warn the user if staged
+- Check if changes form one logical unit or should be split (see philosophy above)
 
 ### Phase 2: Determine Commit Type
 
-Analyze the nature of the changes to pick the correct type:
-
 | Type | When to use |
 |------|-------------|
-| `feat` | New feature or capability added |
+| `feat` | New feature or capability |
 | `fix` | Bug fix |
-| `ref` | Code restructuring with no behavior change |
-| `test` | Adding or updating tests only |
-| `docs` | Documentation changes only |
-| `chore` | Maintenance, dependencies, config |
+| `ref` | Restructuring with no behavior change |
+| `test` | Tests only |
+| `docs` | Documentation only |
+| `chore` | Deps, config, tooling |
 | `perf` | Performance improvement |
-| `ci` | CI/CD pipeline changes |
+| `ci` | CI/CD changes |
 
 Rules:
-- If changes span multiple types, use the **primary** type (the most impactful change)
-- If tests accompany a feature, use `feat` (not `test`)
-- If tests accompany a fix, use `fix` (not `test`)
-- Use `ref` instead of `refactor` (project convention)
+- If changes span multiple types → split the commit, or use the most impactful type only if splitting is truly impractical
+- Tests accompanying a feature → `feat`; accompanying a fix → `fix`
+- Use `ref` not `refactor` (project convention)
 
 ### Phase 3: Craft Commit Message
 
-Write a concise, descriptive message:
-- **Subject line**: `<type>: <imperative description>` (max 72 chars)
-- **Body** (optional, for complex changes): explain *why*, not *what*
-- Use imperative mood: "add sorting" not "added sorting"
-- Be specific: "add sort by date to property list" not "update code"
-- **NEVER mention Claude, AI, Anthropic, or any AI assistant**
-- **NEVER add Co-Authored-By or any trailer referencing Claude/Anthropic**
+Subject line formula: `<type>: <imperative verb> <what>`
+
+Requirements:
+- Imperative mood: "add" not "added", "fix" not "fixes"
+- Specific: "add sort by date to property list" not "update list"
+- No period at end
+- No capitalisation after the colon (lowercase)
+- ≤ 50 chars preferred, hard cap 72
+
+Body (only when needed):
+- Explain *why*, not *what* — the diff already shows what
+- Wrap at 72 chars
+- Separated from subject by a blank line
+
+**Never add:**
+- Co-Authored-By trailers
+- Any mention of Claude, AI, or Anthropic
+- Vague filler words
 
 ### Phase 4: Stage and Commit
 
-1. Stage the relevant files by name (prefer specific files over `git add .`)
-2. Create the commit using a HEREDOC for proper formatting:
+1. Stage specific files by name — avoid `git add .` or `git add -A`
+2. Commit via HEREDOC:
    ```bash
    git commit -m "$(cat <<'EOF'
    <type>: <description>
@@ -67,41 +89,33 @@ Write a concise, descriptive message:
    EOF
    )"
    ```
-3. Run `git status` after commit to verify success
-4. Show the commit hash and message to the user
+3. Run `git status` to confirm clean working tree
+4. Show the commit hash and subject to the user
 
 ### Phase 5: Handle Failures
 
-- If pre-commit hook fails (lint errors), fix the issues and create a **new** commit (never amend)
-- If there are no changes to commit, inform the user
-- If hook modifies files, re-stage and commit again
+- Pre-commit hook fails → fix the issue, create a **new** commit (never amend)
+- Nothing to commit → say so
+- Hook modifies files → re-stage modified files, commit again
 
 ## Examples
 
-Single-type change:
+Good — focused, specific:
 ```
-feat: add energy efficiency badge to property card
-```
-
-Multi-file change with body:
-```
-feat: add bulk selection to property list
-
-Add checkbox column and bulk action toolbar with
-delete and export actions to the property table.
+feat: add energy-arc nudge to scoring engine
+fix: prevent localhost leaking into OAuth redirect URLs
+ref: move Next.js app into apps/web-ui for monorepo
+chore: approve Prisma build scripts at workspace root
 ```
 
-Refactor:
+Bad — vague or bundled:
 ```
-ref: extract validation logic into shared utils
+feat: various updates and fixes          ← vague
+feat: add backend and restructure repo   ← two things
+update code                              ← no type, no specifics
 ```
-
-## Related Commands
-
-- `/verify` - Run checks before committing
-- `/submit-pr` - After committing, submit a PR
 
 ## Arguments
 
-- `/commit` - Analyze changes and commit with auto-generated message
-- `/commit <message>` - Use the provided message directly (still validates type prefix)
+- `/commit` — auto-analyze and commit
+- `/commit <message>` — use provided message (still validates type prefix)
