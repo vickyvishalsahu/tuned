@@ -10,4 +10,5 @@ export type PlayableTrack = {
 
 export type MusicCatalog = {
   search(artist: string, title: string): Promise<PlayableTrack | null>
+  getSavedTracks(): Promise<PlayableTrack[]>
 }
