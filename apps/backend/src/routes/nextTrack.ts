@@ -6,6 +6,8 @@ import { getTasteProfile } from '../services/profileService.js'
 import { scoreAndPick } from '../services/scoringEngine.js'
 import { checkContinuity } from '../services/continuityService.js'
 import { spotifyClient } from '../services/spotifyClient.js'
+import { createSpotifyMusicCatalog } from '../catalog/spotify.js'
+import { createLlmIntelligence } from '../intelligence/llm.js'
 import type { RawContext } from '../types/context.js'
 import type { SessionState, RecentTrackEntry } from '../types/session.js'
 
@@ -70,14 +72,17 @@ export default async (fastify: FastifyInstance, { prisma }: { prisma: PrismaClie
         })
       }
 
-      // 3. Build context vector + load pool and profile in parallel
+      // 3. Build context vector + load profile in parallel
+      // getTasteProfile still uses spotifyClient directly — profileService refactor is separate
       const [cv, profile] = await Promise.all([
         buildContextVector(context, userId, redis),
         getTasteProfile(userId, prisma, redis, spotifyClient),
       ])
 
-      // 4. Load candidate pool (pipeline pool read alongside other work above if possible)
-      const pool = await getCandidatePool(userId, cv, prisma, redis, spotifyClient)
+      // 4. Load candidate pool — catalog + intelligence are created per-request
+      const catalog = createSpotifyMusicCatalog(userId, prisma)
+      const intelligence = createLlmIntelligence()
+      const pool = await getCandidatePool(userId, cv, prisma, redis, catalog, intelligence)
 
       if (pool.length === 0) {
         return reply.code(503).send({ error: 'No candidate tracks available — try again in a moment' })
