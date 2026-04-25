@@ -32,23 +32,7 @@ const scoreTrack = (
   profile: TasteProfile,
   session: SessionState,
 ): number => {
-  const tf = cv.targetFeatures
   const f = track.features
-
-  // a) Feature distance score (0–40)
-  const features: Array<{ val: number; min: number; max: number }> = [
-    { val: f.energy,           min: tf.energy[0],           max: tf.energy[1] },
-    { val: f.valence,          min: tf.valence[0],          max: tf.valence[1] },
-    { val: f.tempo / 200,      min: tf.tempo[0] / 200,      max: tf.tempo[1] / 200 },
-    { val: f.acousticness,     min: tf.acousticness[0],     max: tf.acousticness[1] },
-    { val: f.instrumentalness, min: tf.instrumentalness[0], max: tf.instrumentalness[1] },
-    { val: f.danceability,     min: tf.danceability[0],     max: tf.danceability[1] },
-  ]
-  const distanceScore = features.reduce((sum, { val, min, max }) => {
-    const midpoint = (min + max) / 2
-    const rangeWidth = Math.max(max - min, 0.01)
-    return sum + clamp(1 - Math.abs(val - midpoint) / rangeWidth, 0, 1)
-  }, 0) / features.length * 40
 
   // b) Profile affinity score (0–25) — cosine similarity with learned weights
   const w = profile.audioFeatureWeights
@@ -74,6 +58,31 @@ const scoreTrack = (
     if (avgEnergy > 0.75 && f.energy > 0.75) energyNudge = -10
     else if (avgEnergy < 0.35 && f.energy < 0.35) energyNudge = -10
   }
+
+  // Tracks without real audio features skip the distance calculation.
+  // Substitute the midpoint (20) of the 0–40 range so they compete fairly.
+  if (track.hasRealFeatures === false) {
+    const neutralDistanceScore = 20
+    const base = neutralDistanceScore + affinityScore + libraryBonus + freshnessBonus + diversityPenalty + energyNudge
+    if (track.source === 'recommendation') return base * (0.7 + cv.discoveryWeight * 0.6)
+    return base
+  }
+
+  // a) Feature distance score (0–40)
+  const tf = cv.targetFeatures
+  const featureDimensions: Array<{ val: number; min: number; max: number }> = [
+    { val: f.energy,           min: tf.energy[0],           max: tf.energy[1] },
+    { val: f.valence,          min: tf.valence[0],          max: tf.valence[1] },
+    { val: f.tempo / 200,      min: tf.tempo[0] / 200,      max: tf.tempo[1] / 200 },
+    { val: f.acousticness,     min: tf.acousticness[0],     max: tf.acousticness[1] },
+    { val: f.instrumentalness, min: tf.instrumentalness[0], max: tf.instrumentalness[1] },
+    { val: f.danceability,     min: tf.danceability[0],     max: tf.danceability[1] },
+  ]
+  const distanceScore = featureDimensions.reduce((sum, { val, min, max }) => {
+    const midpoint = (min + max) / 2
+    const rangeWidth = Math.max(max - min, 0.01)
+    return sum + clamp(1 - Math.abs(val - midpoint) / rangeWidth, 0, 1)
+  }, 0) / featureDimensions.length * 40
 
   const base = distanceScore + affinityScore + libraryBonus + freshnessBonus + diversityPenalty + energyNudge
 
