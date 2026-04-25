@@ -208,3 +208,15 @@ Miles handles implementation. Mr. Wolf handles architecture. This document tells
 - v0.3: Add taste profile influence (user history shifts the baseline)
 - v0.4: Add feedback loop (completion rate adjusts weights per user)
 - v1.0: Weights become user-specific, learned over time
+
+---
+
+## How the LLM uses this matrix
+
+When it's time to build a candidate pool, `promptBuilder.ts` reads the context vector and converts numeric values into words using this matrix as the source of truth. A number like `energy: 0.45` becomes "calm and quiet". `valence: 0.3` becomes "dark or melancholic". These word mappings come directly from the dimension descriptions and signal rows in this document.
+
+The LLM (Claude Haiku) then receives three things: a plain-English description of the current moment (weather, time of day, location type), the target mood derived from those word mappings, and the user's taste profile (top genres and artists). From that, it returns roughly 30 artist and title pairs that it believes fit the moment.
+
+The pool builder takes those pairs and searches Spotify for each one. Some won't exist or won't resolve to a streamable track — typically 10–15 out of 30 fall off this way. The surviving tracks (usually 15–20) are combined with tracks from the user's saved library to form the full candidate pool, which the scoring engine then ranks.
+
+One source of truth: this matrix defines the vocabulary the promptBuilder uses. If a weight changes here — say, rain gets a darker valence target — the word mappings in `promptBuilder.ts` must update to match. If they drift apart, the LLM receives a description that contradicts the scoring engine's expectations, and the two layers fall out of sync.
