@@ -1,18 +1,15 @@
 import type { PrismaClient } from '@prisma/client'
 import type { Redis } from 'ioredis'
-import { spotifyClient } from './spotifyClient.js'
 import { getTasteProfile } from './profileService.js'
 import type { CandidateTrack, TrackFeatures } from '../types/profile.js'
 import type { ContextVector } from '../types/context.js'
-import type { ProviderTrack } from '../types/musicProvider.js'
+import type { MusicProvider, ProviderTrack } from '../types/musicProvider.js'
 
 const POOL_TTL = 4 * 60 * 60 // 4 hours
 const MIN_POOL_SIZE = 20
 
 const contextBucket = (cv: ContextVector) =>
   `${cv.timeSlot}:${cv.movementState}:${cv.weatherMood}`
-
-const midpoint = (range: [number, number]) => (range[0] + range[1]) / 2
 
 const trackInContext = (track: CandidateTrack, cv: ContextVector): boolean => {
   // Synthetic tracks have no real features — always admit them and let scoring sort it out
@@ -59,22 +56,23 @@ export const buildCandidatePool = async (
   cv: ContextVector,
   prisma: PrismaClient,
   redis: Redis,
+  provider: MusicProvider,
 ): Promise<CandidateTrack[]> => {
-  const profile = await getTasteProfile(userId, prisma, redis)
-  const token = await spotifyClient.getTokenForUser(userId, prisma)
+  const profile = await getTasteProfile(userId, prisma, redis, provider)
+  const token = await provider.getTokenForUser(userId, prisma)
   const excludeIds = new Set([...profile.recentTrackIds, ...profile.radioTrackIds])
 
   // Fetch all three sources concurrently
   const [savedTracks, recTracks, discoveryTracks] = await Promise.all([
-    spotifyClient.getSavedTracks(token),
-    spotifyClient.getRecommendations(token, {
+    provider.getSavedTracks(token),
+    provider.getRecommendations(token, {
       seedArtistIds:  profile.topArtistIds.slice(0, 2),
       seedGenreNames: profile.topGenres.slice(0, 3),
       targetFeatures: cv.targetFeatures,
       limit:          100,
     }),
     cv.discoveryWeight > 0.4
-      ? spotifyClient.getRecommendations(token, {
+      ? provider.getRecommendations(token, {
           seedArtistIds:  profile.topArtistIds.slice(2, 5),
           targetFeatures: cv.targetFeatures,
           limit:          50,
@@ -91,17 +89,17 @@ export const buildCandidatePool = async (
 
   // Rec tracks come back as CandidateTrack[] from the provider.
   // Fix up isInLibrary here since the provider doesn't know the saved set.
-  const toLibraryFlagged = (track: CandidateTrack): CandidateTrack =>
+  const withLibraryFlag = (track: CandidateTrack): CandidateTrack =>
     savedIds.has(track.trackId) ? { ...track, isInLibrary: true } : track
 
   const recPool = recTracks
     .filter(track => !excludeIds.has(track.trackId))
-    .map(toLibraryFlagged)
+    .map(withLibraryFlag)
     .filter(candidate => trackInContext(candidate, cv))
 
   const discoveryPool = discoveryTracks
     .filter(track => !excludeIds.has(track.trackId))
-    .map(toLibraryFlagged)
+    .map(withLibraryFlag)
     .filter(candidate => trackInContext(candidate, cv))
 
   // Merge — library takes precedence on duplicates (~40% library, ~40% rec, ~20% discovery)
@@ -127,6 +125,7 @@ export const getCandidatePool = async (
   cv: ContextVector,
   prisma: PrismaClient,
   redis: Redis,
+  provider: MusicProvider,
 ): Promise<CandidateTrack[]> => {
   const bucket = contextBucket(cv)
   const cached = await redis.get(`pool:${userId}:${bucket}`)
@@ -139,5 +138,5 @@ export const getCandidatePool = async (
     }
   }
 
-  return buildCandidatePool(userId, cv, prisma, redis)
+  return buildCandidatePool(userId, cv, prisma, redis, provider)
 }
