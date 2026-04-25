@@ -1,7 +1,8 @@
 import type { PrismaClient } from '@prisma/client'
 import type { Redis } from 'ioredis'
 import { spotifyClient } from './spotifyClient.js'
-import type { TasteProfile, AudioFeatureWeights } from '../types/profile.js'
+import { inferFeaturesFromGenres } from './featureInference.js'
+import type { TasteProfile } from '../types/profile.js'
 
 const PROFILE_TTL = 2 * 60 * 60 // 2 hours
 
@@ -21,9 +22,7 @@ export const buildTasteProfile = async (
   const topArtistIds = topArtists.map(a => a.id)
   const topGenres = [...new Set(topArtists.flatMap(a => a.genres))].slice(0, 10)
 
-  // Average audio features of top tracks → baseline weights
-  const featureMap = await spotifyClient.getAudioFeatures(token, topTracks.map(t => t.id))
-  const audioFeatureWeights = averageFeatures(featureMap)
+  const audioFeatureWeights = inferFeaturesFromGenres(topGenres)
 
   const recentTrackIds = recentTracks.map(t => t.id)
 
@@ -82,29 +81,3 @@ export const getTasteProfile = async (
   return buildTasteProfile(userId, prisma, redis)
 }
 
-const averageFeatures = (featureMap: Map<string, { energy: number; valence: number; tempo: number; acousticness: number; instrumentalness: number; danceability: number }>): AudioFeatureWeights => {
-  const values = [...featureMap.values()]
-  if (values.length === 0) {
-    return { energy: 0.5, valence: 0.5, tempo: 0.5, acousticness: 0.5, instrumentalness: 0.5, danceability: 0.5 }
-  }
-  const sum = values.reduce(
-    (acc, f) => ({
-      energy: acc.energy + f.energy,
-      valence: acc.valence + f.valence,
-      tempo: acc.tempo + f.tempo / 200, // normalize BPM to 0–1
-      acousticness: acc.acousticness + f.acousticness,
-      instrumentalness: acc.instrumentalness + f.instrumentalness,
-      danceability: acc.danceability + f.danceability,
-    }),
-    { energy: 0, valence: 0, tempo: 0, acousticness: 0, instrumentalness: 0, danceability: 0 },
-  )
-  const n = values.length
-  return {
-    energy: sum.energy / n,
-    valence: sum.valence / n,
-    tempo: sum.tempo / n,
-    acousticness: sum.acousticness / n,
-    instrumentalness: sum.instrumentalness / n,
-    danceability: sum.danceability / n,
-  }
-}
