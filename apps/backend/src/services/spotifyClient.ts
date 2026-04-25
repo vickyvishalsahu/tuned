@@ -192,6 +192,12 @@ export const spotifyClient = {
     const data = await res.json() as { tracks: SpotifyTrack[] };
     return data.tracks;
   },
+
+  async getAlbumTracks(token: string, albumId: string): Promise<SpotifyAlbumTrack[]> {
+    const res = await spotifyGet(token, `/albums/${albumId}/tracks?limit=50`)
+    const data = await res.json() as { items: SpotifyAlbumTrack[] }
+    return data.items
+  },
 };
 
 // --- internal helpers ---
@@ -223,8 +229,16 @@ export type SpotifyTrack = {
   name: string
   duration_ms: number
   popularity: number
+  preview_url: string | null
   artists: Array<{ id: string; name: string }>
   album: { id: string; name: string; images: Array<{ url: string }> }
+}
+
+export type SpotifyAlbumTrack = {
+  id: string
+  name: string
+  track_number: number
+  artists: Array<{ id: string; name: string }>
 }
 
 type SpotifyAudioFeature = {
