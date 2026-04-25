@@ -206,6 +206,7 @@ pnpm prisma generate                           # regenerate Prisma client after 
 | `JWT_SECRET` | Secret for signing JWTs. Generate with `openssl rand -hex 32` |
 | `PORT` | Backend port (default: 3001) |
 | `NEWS_API_KEY` | Optional. From [newsapi.org](https://newsapi.org) — used for sentiment scoring |
+| `ANTHROPIC_API_KEY` | Claude API key — powers the LLM music intelligence layer. Get one at [console.anthropic.com](https://console.anthropic.com) |
 
 ---
 

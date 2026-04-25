@@ -65,6 +65,7 @@ cp .env.example .env
 | `JWT_SECRET` | Sign JWTs — generate with `openssl rand -hex 32` |
 | `PORT` | Server port (default: 3001) |
 | `NEWS_API_KEY` | Optional — [newsapi.org](https://newsapi.org) for sentiment scoring |
+| `ANTHROPIC_API_KEY` | Claude API key — used by the LLM music intelligence layer. Get one at [console.anthropic.com](https://console.anthropic.com) |
 
 ---
 
