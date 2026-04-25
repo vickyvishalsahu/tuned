@@ -55,7 +55,7 @@ const score = (candidate: SpotifySearchTrack, targetArtist: string, targetTitle:
 
 // Scores each result against target artist + title. Returns the best match
 // above threshold (score >= 2), or null if none qualify.
-export const bestMatch = (
+const bestMatch = (
   results: SpotifySearchTrack[],
   targetArtist: string,
   targetTitle: string,
@@ -73,6 +73,8 @@ export const bestMatch = (
 
   return bestScore >= 2 ? best : null
 }
+
+export const _bestMatch = bestMatch // exported for testing only
 
 export const createSpotifyMusicCatalog = (userId: string, prisma: PrismaClient): MusicCatalog => ({
   async search(artist, title) {
