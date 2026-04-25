@@ -9,6 +9,7 @@ import healthRoute from "./routes/health.js";
 import authRoutes from "./routes/auth.js";
 import contextRoutes from "./routes/context.js";
 import poolRoutes from "./routes/pool.js";
+import devRoutes from "./routes/dev.js";
 
 const prisma = new PrismaClient();
 
@@ -24,6 +25,7 @@ const start = async () => {
   await fastify.register(authRoutes, { prisma });
   await fastify.register(contextRoutes);
   await fastify.register(poolRoutes, { prisma });
+  await fastify.register(devRoutes, { prisma });
 
   const port = Number(process.env.PORT ?? 3001);
 

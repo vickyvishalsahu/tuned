@@ -8,6 +8,9 @@
     "build": "turbo build",
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
+    "clean": "turbo run clean",
+    "clean:deep": "find . -type d \\( -name 'node_modules' -o -name 'dist' -o -name '.turbo' -o -name '.next' \\) -prune -exec rm -rf '{}' +",
+    "build:fresh": "pnpm clean:deep && pnpm install && pnpm build",
     "release": "./release",
     "release:dry": "./release --dry-run"
   },
