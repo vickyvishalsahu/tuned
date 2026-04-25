@@ -2,8 +2,9 @@ import type { PrismaClient } from '@prisma/client'
 import type { Redis } from 'ioredis'
 import { spotifyClient } from './spotifyClient.js'
 import { getTasteProfile } from './profileService.js'
-import type { CandidateTrack } from '../types/profile.js'
+import type { CandidateTrack, TrackFeatures } from '../types/profile.js'
 import type { ContextVector } from '../types/context.js'
+import type { SpotifyTrack } from './spotifyClient.js'
 
 const POOL_TTL = 4 * 60 * 60 // 4 hours
 const MIN_POOL_SIZE = 20
@@ -13,16 +14,43 @@ const contextBucket = (cv: ContextVector) =>
 
 const midpoint = (range: [number, number]) => (range[0] + range[1]) / 2
 
-const inRange = (val: number, range: [number, number]) => val >= range[0] && val <= range[1]
+const trackInContext = (track: CandidateTrack, cv: ContextVector): boolean => {
+  // Synthetic tracks have no real features — always admit them and let scoring sort it out
+  if (track.hasRealFeatures === false) return true
 
-const trackInContext = (features: CandidateTrack['features'], cv: ContextVector): boolean => {
   const tf = cv.targetFeatures
+  const f = track.features
   return (
-    inRange(features.energy, tf.energy) &&
-    inRange(features.valence, tf.valence) &&
-    inRange(features.acousticness, tf.acousticness)
+    f.energy >= tf.energy[0] && f.energy <= tf.energy[1] &&
+    f.valence >= tf.valence[0] && f.valence <= tf.valence[1] &&
+    f.acousticness >= tf.acousticness[0] && f.acousticness <= tf.acousticness[1]
   )
 }
+
+const syntheticFeaturesFromTargets = (featureTargets: {
+  targetEnergy?: number
+  targetValence?: number
+  targetTempo?: number
+  targetAcousticness?: number
+}): TrackFeatures => ({
+  energy:           featureTargets.targetEnergy      ?? 0.5,
+  valence:          featureTargets.targetValence     ?? 0.5,
+  tempo:            (featureTargets.targetTempo      ?? 0.5) * 200,
+  acousticness:     featureTargets.targetAcousticness ?? 0.5,
+  instrumentalness: 0.3,
+  danceability:     0.5,
+  loudness:         -8,
+})
+
+const neutralFeatures = (): TrackFeatures => ({
+  energy: 0.5,
+  valence: 0.5,
+  tempo: 120,
+  acousticness: 0.5,
+  instrumentalness: 0.3,
+  danceability: 0.5,
+  loudness: -8,
+})
 
 export const buildCandidatePool = async (
   userId: string,
@@ -35,13 +63,13 @@ export const buildCandidatePool = async (
   const excludeIds = new Set([...profile.recentTrackIds, ...profile.radioTrackIds])
 
   const featureTargets = {
-    targetEnergy: midpoint(cv.targetFeatures.energy),
-    minEnergy: cv.targetFeatures.energy[0],
-    maxEnergy: cv.targetFeatures.energy[1],
-    targetValence: midpoint(cv.targetFeatures.valence),
-    minValence: cv.targetFeatures.valence[0],
-    maxValence: cv.targetFeatures.valence[1],
-    targetTempo: midpoint(cv.targetFeatures.tempo),
+    targetEnergy:      midpoint(cv.targetFeatures.energy),
+    minEnergy:         cv.targetFeatures.energy[0],
+    maxEnergy:         cv.targetFeatures.energy[1],
+    targetValence:     midpoint(cv.targetFeatures.valence),
+    minValence:        cv.targetFeatures.valence[0],
+    maxValence:        cv.targetFeatures.valence[1],
+    targetTempo:       midpoint(cv.targetFeatures.tempo),
     targetAcousticness: midpoint(cv.targetFeatures.acousticness),
   }
 
@@ -63,42 +91,47 @@ export const buildCandidatePool = async (
       : Promise.resolve([]),
   ])
 
-  // Batch-fetch audio features for all unique tracks
-  const allTracks = [...savedTracks, ...recTracks, ...discoveryTracks]
-  const uniqueIds = [...new Set(allTracks.map(t => t.id).filter(id => !excludeIds.has(id)))]
-  const featureMap = await spotifyClient.getAudioFeatures(token, uniqueIds)
+  const savedIds = new Set(savedTracks.map(track => track.id))
+  const syntheticFeatures = syntheticFeaturesFromTargets(featureTargets)
 
-  const savedIds = new Set(savedTracks.map(t => t.id))
-
-  const toCandidates = (
-    tracks: typeof savedTracks,
+  const toCandidate = (
+    track: SpotifyTrack,
     source: CandidateTrack['source'],
-  ): CandidateTrack[] =>
-    tracks
-      .filter(t => !excludeIds.has(t.id) && featureMap.has(t.id))
-      .map(t => ({
-        trackId: t.id,
-        trackName: t.name,
-        artistId: t.artists[0]?.id ?? '',
-        artistName: t.artists[0]?.name ?? '',
-        albumId: t.album.id,
-        albumName: t.album.name,
-        albumArtUrl: t.album.images[0]?.url ?? '',
-        durationMs: t.duration_ms,
-        previewUrl: t.preview_url ?? null,
-        features: featureMap.get(t.id)!,
-        popularity: t.popularity,
-        isInLibrary: savedIds.has(t.id),
-        source,
-      }))
-      .filter(c => trackInContext(c.features, cv))
+    features: TrackFeatures,
+    hasRealFeatures: boolean,
+  ): CandidateTrack => ({
+    trackId:      track.id,
+    trackName:    track.name,
+    artistId:     track.artists[0]?.id ?? '',
+    artistName:   track.artists[0]?.name ?? '',
+    albumId:      track.album.id,
+    albumName:    track.album.name,
+    albumArtUrl:  track.album.images[0]?.url ?? '',
+    durationMs:   track.duration_ms,
+    previewUrl:   track.preview_url ?? null,
+    features,
+    popularity:   track.popularity,
+    isInLibrary:  savedIds.has(track.id),
+    source,
+    hasRealFeatures,
+  })
 
-  const libraryPool = toCandidates(savedTracks, 'library')
-  const recPool = toCandidates(recTracks, 'recommendation')
-  const discoveryPool = toCandidates(discoveryTracks, 'recommendation')
+  const libraryPool = savedTracks
+    .filter(track => !excludeIds.has(track.id))
+    .map(track => toCandidate(track, 'library', neutralFeatures(), false))
+    .filter(candidate => trackInContext(candidate, cv))
 
-  // Merge with rough target proportions (~40% library, ~40% rec, ~20% discovery)
-  // Dedup by trackId across sources — library takes precedence
+  const recPool = recTracks
+    .filter(track => !excludeIds.has(track.id))
+    .map(track => toCandidate(track, 'recommendation', syntheticFeatures, false))
+    .filter(candidate => trackInContext(candidate, cv))
+
+  const discoveryPool = discoveryTracks
+    .filter(track => !excludeIds.has(track.id))
+    .map(track => toCandidate(track, 'recommendation', syntheticFeatures, false))
+    .filter(candidate => trackInContext(candidate, cv))
+
+  // Merge — library takes precedence on duplicates (~40% library, ~40% rec, ~20% discovery)
   const seen = new Set<string>()
   const pool: CandidateTrack[] = []
 
