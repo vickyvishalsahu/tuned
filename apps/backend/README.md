@@ -195,7 +195,7 @@ src/
 |---|---|---|
 | 1 | Scaffold, OAuth, JWT auth, Prisma schema | ✅ |
 | 2 | Context vector — time, weather, location, movement | ✅ |
-| 3 | Taste profile + candidate pool | ✅ |
+| 3 | Taste profile · `MusicCatalog` (Spotify search) · `MusicIntelligence` (Claude Haiku) · candidate pool | ✅ |
 | 4 | `/next-track` scoring engine + session state | ✅ |
-| 5 | BullMQ workers — feedback loop, pool refresh | ⏳ |
+| 5 | BullMQ workers — feedback loop, background pool refresh, profile sync | ⏳ |
 | 6 | Rate limiting, structured logging, hardening | ⏳ |
