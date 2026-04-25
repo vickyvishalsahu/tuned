@@ -229,3 +229,37 @@ Alternatives considered:
 - Build our own catalog: too expensive for MVP
 
 Consequences: MusicIntelligence needs an implementation. First candidate: Last.fm tags API or LLM — decision deferred to Dolores.
+
+---
+
+## ADR-012 — LLM as MusicIntelligence
+
+Date: April 2025
+Status: Active
+
+Decision: Use Claude Haiku as the implementation of the MusicIntelligence interface.
+
+Why: Only an LLM can take a full context description — rain, 7am, Berlin, familiar commute — and return tracks that fit the moment. Last.fm's tags API is taste-aware, not context-aware. It can tell you what genre a user likes; it can't tell you what genre fits a rainy Tuesday at dawn. Using an LLM means no translation layer is needed between our context signals and the recommendation engine — we describe the moment in plain English and get tracks back.
+
+Haiku was chosen over Sonnet and Opus: fast enough for a background pool-build step, cheap enough to run at MVP scale, and capable enough for music recommendation prompts.
+
+Alternatives considered:
+- Last.fm tags API: ruled out — requires a tag-to-context mapping layer, and still can't reason about context, only about genres and artist similarity
+
+Consequences: Hallucination risk — some returned tracks won't exist on Spotify. Mitigated by requesting 30 tracks and expecting 15–20 to resolve. The prompt and CONTEXT_MUSIC_MATRIX.md must stay in sync — both encode the same number-to-word mappings for context dimensions like energy and valence. Cost is negligible at MVP scale.
+
+---
+
+## ADR-013 — LLM is never on the hot path
+
+Date: April 2025
+Status: Active
+
+Decision: The LLM recommendation call lives in `buildCandidatePool`, not in `/next-track`. The resulting pool is cached in Redis for 4 hours.
+
+Why: An LLM call adds 800ms–2s of latency. `/next-track` is called every 3–4 minutes during a listening session — it must respond in under 200ms. The pool is already a cached artifact; the LLM only runs when the pool is first built or has gone stale. This keeps the hot path fast regardless of LLM response time.
+
+Alternatives considered:
+- Call the LLM on every `/next-track` request: unacceptable latency — 800ms+ on the critical user-facing path
+
+Consequences: Recommendations update at most every 4 hours. A sudden context change (weather shifts from sun to rain mid-session) won't reflect in the pool until the next refresh. This is acceptable for MVP — the pool still contains contextually appropriate tracks from when it was built.
