@@ -11,7 +11,7 @@ export default function Home() {
       <div className="relative z-10 flex flex-col items-center gap-12 text-center">
         <div className="flex flex-col items-center gap-4">
           <h1 className="font-display text-5xl font-light tracking-tight text-white/90 md:text-7xl">
-            Radio
+            Tuned
           </h1>
           <p className="max-w-xs font-body text-lg font-light text-white/40 md:text-xl">
             One channel. No choices. Just listen.

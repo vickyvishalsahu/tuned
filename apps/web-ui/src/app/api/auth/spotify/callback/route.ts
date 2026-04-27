@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   try {
     const tokens = await exchangeCodeForTokens(code);
 
-    const response = NextResponse.redirect(new URL("/radio", appUrl));
+    const response = NextResponse.redirect(new URL("/tuned", appUrl));
 
     response.cookies.delete("spotify_auth_state");
 

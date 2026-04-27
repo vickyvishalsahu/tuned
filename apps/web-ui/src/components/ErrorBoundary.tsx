@@ -28,10 +28,10 @@ export default class ErrorBoundary extends Component<TErrorBoundaryProps, TError
         this.props.fallback ?? (
           <div className="flex min-h-dvh flex-col items-center justify-center bg-surface px-6 text-center">
             <p className="font-display text-2xl font-light text-white/60">
-              {strings.radio.errorTitle}
+              {strings.tuned.errorTitle}
             </p>
             <p className="mt-3 font-body text-sm text-white/30">
-              {strings.radio.errorBody}
+              {strings.tuned.errorBody}
             </p>
           </div>
         )

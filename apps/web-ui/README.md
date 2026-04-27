@@ -1,8 +1,8 @@
-# @radio/web-ui
+# @tuned/web-ui
 
-The frontend for Radio. Built with Next.js 15 App Router.
+The frontend for Tuned. Built with Next.js 15 App Router.
 
-Handles Spotify OAuth, the player UI, and playback via the Spotify Web Playback SDK. Talks to `@radio/backend` for track selection and session state.
+Handles Spotify OAuth, the player UI, and playback via the Spotify Web Playback SDK. Talks to `@tuned/backend` for track selection and session state.
 
 > See the [root README](../../README.md) for full setup, commands, and the explanation of why we use `127.0.0.1` instead of `localhost`.
 
@@ -13,7 +13,7 @@ Handles Spotify OAuth, the player UI, and playback via the Spotify Web Playback 
 ```bash
 # From the monorepo root (recommended)
 pnpm dev                               # starts both apps
-pnpm dev --filter=@radio/web-ui        # starts only this app
+pnpm dev --filter=@tuned/web-ui        # starts only this app
 
 # From this directory
 pnpm dev
@@ -57,14 +57,14 @@ The `-H 127.0.0.1` flag in the `dev` script and the redirect in `src/middleware.
 src/
 ├── app/
 │   ├── page.tsx                        # Landing page — sign in CTA
-│   ├── radio/page.tsx                  # Player screen
+│   ├── tuned/page.tsx                  # Player screen
 │   └── api/
 │       ├── auth/spotify/route.ts       # OAuth initiation — redirects to Spotify
 │       ├── auth/spotify/callback/      # OAuth callback — exchanges code, sets cookies
 │       ├── auth/signout/               # Clears auth cookies
 │       └── spotify/play/              # Starts playback via Web Playback SDK
 ├── components/
-│   ├── RadioPlayer.tsx                 # Main player orchestrator
+│   ├── TunedPlayer.tsx                 # Main player orchestrator
 │   ├── Player.tsx                      # Player UI shell
 │   ├── AlbumArt.tsx                    # Blurred background + centered art
 │   ├── TrackInfo.tsx                   # Artist + track name
@@ -88,7 +88,7 @@ User clicks "Sign in with Spotify"
   → GET /api/auth/spotify          (sets state cookie, redirects to Spotify)
   → Spotify login
   → GET /api/auth/spotify/callback (exchanges code, sets access/refresh token cookies)
-  → Redirect to /radio
+  → Redirect to /tuned
 ```
 
-Tokens are stored in cookies (`spotify_access_token`, `spotify_refresh_token`). The middleware checks for `spotify_access_token` to protect `/radio`.
+Tokens are stored in cookies (`spotify_access_token`, `spotify_refresh_token`). The middleware checks for `spotify_access_token` to protect `/tuned`.

@@ -1,5 +1,5 @@
 {
-  "name": "radio",
+  "name": "tuned",
   "version": "0.0.0",
   "private": true,
   "packageManager": "pnpm@10.33.0",
@@ -18,6 +18,6 @@
     "turbo": "^2"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "@radio/backend", "esbuild", "prisma", "sharp", "unrs-resolver"]
+    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "@tuned/backend", "esbuild", "prisma", "sharp", "unrs-resolver"]
   }
 }

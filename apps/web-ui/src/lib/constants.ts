@@ -1,6 +1,6 @@
 export const SPOTIFY_SDK_URL = "https://sdk.scdn.co/spotify-player.js";
 export const SPOTIFY_SDK_SCRIPT_SELECTOR = `script[src="${SPOTIFY_SDK_URL}"]`;
-export const SPOTIFY_PLAYER_NAME = "Radio";
+export const SPOTIFY_PLAYER_NAME = "Tuned";
 
 export const DEFAULT_DOMINANT_COLOR = { r: 30, g: 20, b: 40 };
 

@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-A log of every significant architectural and product decision made during Radio MVP development. Entries are in chronological order. Each decision is permanent here even if later superseded — the history matters.
+A log of every significant architectural and product decision made during Tuned development. Entries are in chronological order. Each decision is permanent here even if later superseded — the history matters.
 
 ---
 
@@ -32,7 +32,7 @@ A log of every significant architectural and product decision made during Radio 
 
 **Decision**: The server-side logic lives in a standalone Fastify process on port 3001, not in Next.js API routes.
 
-**Why**: Next.js API routes are stateless — they spin up per request and die. Radio needs things that don't fit that model:
+**Why**: Next.js API routes are stateless — they spin up per request and die. Tuned needs things that don't fit that model:
 - BullMQ workers that run continuously in the background
 - Persistent Redis connections for caching pools, sessions, and context vectors
 - A mutex around Spotify token refresh to prevent concurrent race conditions
@@ -55,7 +55,7 @@ Vercel (the obvious Next.js host) makes background workers impossible — functi
 **Date**: April 2025  
 **Status**: Active
 
-**Decision**: Radio ships as a web app (Next.js) first. Native (iOS/Android) is deferred.
+**Decision**: Tuned ships as a web app (Next.js) first. Native (iOS/Android) is deferred.
 
 **Why**: Vicky is a frontend developer — web is the fastest path to a working product. The Spotify Web Playback SDK works in the browser without App Store approval. Web lets us iterate without a build/review cycle. Native adds significant complexity (background audio, Bluetooth handoff, OS media controls) that is premature before the core algorithm is validated.
 
@@ -203,7 +203,7 @@ The interface boundary also clarifies what the scoring engine needs: `CandidateT
 
 **Decision**: The app does not expose skip, queue management, or track selection to the user. The algorithm picks every track. The user presses play and listens.
 
-**Why**: This is the core product identity. The moment you add skip, you're competing with Spotify and every other streaming app. Radio's proposition is: "trust the algorithm for this moment." Skipping undermines that trust — if users skip, the algorithm must be right; if it's wrong, the product has failed at its one job.
+**Why**: This is the core product identity. The moment you add skip, you're competing with Spotify and every other streaming app. Tuned's proposition is: "trust the algorithm for this moment." Skipping undermines that trust — if users skip, the algorithm must be right; if it's wrong, the product has failed at its one job.
 
 Removing skip also simplifies the backend significantly — no queue state to manage, no skip signal to propagate, no "next track already queued" race condition.
 

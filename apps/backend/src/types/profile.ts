@@ -13,7 +13,7 @@ export type TasteProfile = {
   topGenres: string[]
   audioFeatureWeights: AudioFeatureWeights
   recentTrackIds: string[]   // last 50 from Spotify
-  radioTrackIds: string[]    // played by Radio (from PlayEvent)
+  tunedTrackIds: string[]    // played by Tuned (from PlayEvent)
   updatedAt: Date
 }
 

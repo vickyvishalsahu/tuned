@@ -15,7 +15,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Radio MVP",
+  title: "Tuned",
   description: "One channel. No choices. Just listen.",
 };
 

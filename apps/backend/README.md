@@ -1,6 +1,6 @@
-# @radio/backend
+# @tuned/backend
 
-The Fastify API for Radio. Handles context analysis, track scoring, session state, and background learning.
+The Fastify API for Tuned. Handles context analysis, track scoring, session state, and background learning.
 
 Track selection uses a two-layer intelligence system: `MusicIntelligence` (Claude Haiku) generates artist/title candidates from context and user taste, and `MusicCatalog` (Spotify) resolves them to playable tracks.
 
@@ -10,7 +10,7 @@ Track selection uses a two-layer intelligence system: `MusicIntelligence` (Claud
 
 ## Why this exists alongside Next.js
 
-Next.js API routes are stateless — they can't hold open connections or run continuously. This backend exists because Radio needs:
+Next.js API routes are stateless — they can't hold open connections or run continuously. This backend exists because Tuned needs:
 
 - **BullMQ workers** that run continuously in the background (phases 5–6)
 - **Persistent Redis connections** for caching pools, sessions, and context vectors
@@ -24,7 +24,7 @@ Next.js API routes are stateless — they can't hold open connections or run con
 ```bash
 # From the monorepo root (recommended)
 pnpm dev                                 # starts both apps
-pnpm dev --filter=@radio/backend         # starts only this app
+pnpm dev --filter=@tuned/backend         # starts only this app
 
 # From this directory
 pnpm dev
@@ -39,7 +39,7 @@ Runs on `http://localhost:3001`.
 Requires Postgres and Redis. Start them with Docker from the repo root:
 
 ```bash
-# From radio-mvp/
+# From repo root
 docker compose up -d
 ```
 

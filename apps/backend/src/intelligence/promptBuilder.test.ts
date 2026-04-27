@@ -30,7 +30,7 @@ const makeProfile = (overrides: Partial<TasteProfile> = {}): TasteProfile => ({
   topGenres: ['indie', 'folk'],
   audioFeatureWeights: { energy: 0.4, valence: 0.5, tempo: 0.5, acousticness: 0.7, instrumentalness: 0.3, danceability: 0.4 },
   recentTrackIds: [],
-  radioTrackIds: [],
+  tunedTrackIds: [],
   updatedAt: new Date(),
   ...overrides,
 })

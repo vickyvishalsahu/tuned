@@ -119,7 +119,7 @@ export const buildCandidatePool = async (
   // 1. Fetch saved tracks from catalog (platform data)
   const savedTracks = await catalog.getSavedTracks()
   const savedIds = new Set(savedTracks.map((track) => track.trackId))
-  const excludeIds = new Set([...profile.recentTrackIds, ...profile.radioTrackIds])
+  const excludeIds = new Set([...profile.recentTrackIds, ...profile.tunedTrackIds])
 
   const libraryPool = savedTracks
     .filter((track) => !excludeIds.has(track.trackId))

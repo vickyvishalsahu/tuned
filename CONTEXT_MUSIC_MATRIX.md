@@ -1,8 +1,8 @@
-# Radio — Context × Music Matrix
+# Tuned — Context × Music Matrix
 
 **Status**: Living document. Version 0.1 — simplified. Will be refined as we learn.  
 **Owner**: Dolores  
-**Purpose**: Define how real-world signals translate into music targets. This is Radio's proprietary intelligence layer.
+**Purpose**: Define how real-world signals translate into music targets. This is Tuned's proprietary intelligence layer.
 
 ---
 
@@ -10,7 +10,7 @@
 
 Shazam listens to a song and finds it by matching its acoustic fingerprint — the pattern of beats, bass, frequencies — against a database. It works backwards: audio → identity.
 
-Radio does the opposite. It reads your moment and works forwards: **context → acoustic fingerprint → find the right track.**
+Tuned does the opposite. It reads your moment and works forwards: **context → acoustic fingerprint → find the right track.**
 
 Instead of identifying a song from sound, we construct a "sound target" from your situation — and find a track that matches it.
 
@@ -148,7 +148,7 @@ Shazam builds a constellation map: peaks in the frequency spectrum plotted again
 
 We don't identify — we **target**. But we use the same acoustic dimensions:
 
-| Shazam cares about | Radio targets it as |
+| Shazam cares about | Tuned targets it as |
 |---|---|
 | Frequency peak density | → Instrumentalness (sparse = more instrumental) |
 | Low-frequency peak strength | → Bass weight + Energy |

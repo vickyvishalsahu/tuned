@@ -42,7 +42,7 @@ export default function Player({
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center bg-surface">
         <p className="font-display text-xl font-light text-white/40">
-          {strings.radio.tuningIn}
+          {strings.tuned.tuningIn}
         </p>
       </div>
     );

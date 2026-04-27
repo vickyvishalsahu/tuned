@@ -1,11 +1,11 @@
 import { quotes } from "@/lib/quotes";
-import RadioPlayer from "@/components/RadioPlayer";
+import TunedPlayer from "@/components/TunedPlayer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
-export default function RadioPage() {
+export default function TunedPage() {
   return (
     <ErrorBoundary>
-      <RadioPlayer quotes={quotes} />
+      <TunedPlayer quotes={quotes} />
     </ErrorBoundary>
   );
 }

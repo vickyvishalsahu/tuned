@@ -26,14 +26,14 @@ export const buildTasteProfile = async (
 
   const recentTrackIds = recentTracks.map(track => track.id)
 
-  // Radio's own play history from Postgres (last 200)
+  // Tuned's own play history from Postgres (last 200)
   const playEvents = await prisma.playEvent.findMany({
     where: { userId },
     orderBy: { playedAt: 'desc' },
     take: 200,
     select: { trackId: true },
   })
-  const radioTrackIds = playEvents.map(event => event.trackId)
+  const tunedTrackIds = playEvents.map(event => event.trackId)
 
   const profile: TasteProfile = {
     userId,
@@ -41,7 +41,7 @@ export const buildTasteProfile = async (
     topGenres,
     audioFeatureWeights,
     recentTrackIds,
-    radioTrackIds,
+    tunedTrackIds,
     updatedAt: new Date(),
   }
 
@@ -54,14 +54,14 @@ export const buildTasteProfile = async (
       topGenres,
       audioFeatureWeights,
       recentTrackIds,
-      radioTrackIds,
+      tunedTrackIds,
     },
     update: {
       topArtistIds,
       topGenres,
       audioFeatureWeights,
       recentTrackIds,
-      radioTrackIds,
+      tunedTrackIds,
     },
   })
 

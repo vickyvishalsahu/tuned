@@ -4,11 +4,11 @@ import { useSpotifyPlayer } from "@/hooks/useSpotifyPlayer";
 import type { Quote } from "@/lib/types";
 import Player from "./Player";
 
-type TRadioPlayerProps = {
+type TTunedPlayerProps = {
   quotes: Quote[];
 };
 
-export default function RadioPlayer({ quotes }: TRadioPlayerProps) {
+export default function TunedPlayer({ quotes }: TTunedPlayerProps) {
   const { track, position, duration, paused, isLoading, error, next, togglePlay } =
     useSpotifyPlayer();
 

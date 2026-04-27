@@ -1,8 +1,8 @@
-# Radio MVP — Product & Technical Spec
+# Tuned — Product & Technical Spec
 
 ## What is this?
 
-A context-aware radio app. One channel. No choices. Press play, something plays. The app reads your context and taste — you just listen.
+A context-aware music app. One channel. No choices. Press play, something plays. The app reads your context and taste — you just listen.
 
 Spotify is the jukebox. We own the brain.
 
@@ -33,7 +33,7 @@ Spotify is the jukebox. We own the brain.
    - Subtle advancement bar (no timestamps)
    - Ambient background color shifts with track mood
 6. Track ends → next track auto-plays (user never sees what's coming)
-7. We create/update a "Radio MVP" playlist on their Spotify account
+7. We create/update a "Tuned" playlist on their Spotify account
 ```
 
 ---
@@ -83,7 +83,7 @@ Spotify is the jukebox. We own the brain.
 - `user-library-read` — saved tracks
 - `user-read-recently-played` — recent listening
 - `streaming` — Web Playback SDK
-- `playlist-modify-public` or `playlist-modify-private` — create/update the Radio MVP playlist
+- `playlist-modify-public` or `playlist-modify-private` — create/update the Tuned playlist
 - `user-read-playback-state` — current playback state
 
 **API endpoints we'll use:**
@@ -92,7 +92,7 @@ Spotify is the jukebox. We own the brain.
 - `GET /me/top/tracks` — taste profile
 - `GET /me/player/recently-played` — recent context
 - `GET /recommendations` — seed with top artists/genres + target attributes
-- `POST /users/{id}/playlists` — create Radio MVP playlist
+- `POST /users/{id}/playlists` — create Tuned playlist
 - `PUT /playlists/{id}/tracks` — update playlist
 - `GET /audio-features/{id}` — energy, valence, tempo for context matching
 
@@ -144,7 +144,7 @@ Receive track list → queue first track via Web Playback SDK
     ↓
 Track ends → pick next from recommendations (or fetch new batch)
     ↓
-Add played tracks to "Radio MVP" playlist on user's Spotify
+Add played tracks to "Tuned" playlist on user's Spotify
 ```
 
 ### Quotes System
@@ -164,12 +164,12 @@ Add played tracks to "Radio MVP" playlist on user's Spotify
 ## Project Structure
 
 ```
-radio-mvp/
+tuned/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx            # Root layout, fonts, metadata
 │   │   ├── page.tsx              # Landing page — auth CTA
-│   │   ├── radio/
+│   │   ├── tuned/
 │   │   │   └── page.tsx          # The player screen
 │   │   └── api/
 │   │       └── auth/
@@ -239,7 +239,7 @@ NEXT_PUBLIC_APP_URL=
 
 - Native app (React Native or Swift) — proper motion/sensor access
 - ML-based context engine — learn from what gets played vs abandoned
-- Limited skips (3 per hour?) — radio-style
+- Limited skips (3 per hour?) — lean-back-style
 - Weather API integration
 - "Mood nudge" — a single subtle control, like a warm/cool slider
 - Multiple curated channels

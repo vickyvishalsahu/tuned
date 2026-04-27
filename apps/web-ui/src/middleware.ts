@@ -12,7 +12,7 @@ export const middleware = (request: NextRequest) => {
   const token = request.cookies.get("spotify_access_token")?.value;
   const { pathname } = request.nextUrl;
 
-  if (pathname === "/radio" && !token) {
+  if (pathname === "/tuned" && !token) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
@@ -20,7 +20,7 @@ export const middleware = (request: NextRequest) => {
 
   if (pathname === "/" && token) {
     const url = request.nextUrl.clone();
-    url.pathname = "/radio";
+    url.pathname = "/tuned";
     return NextResponse.redirect(url);
   }
 
@@ -28,5 +28,5 @@ export const middleware = (request: NextRequest) => {
 }
 
 export const config = {
-  matcher: ["/", "/radio"],
+  matcher: ["/", "/tuned"],
 };

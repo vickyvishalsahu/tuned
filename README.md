@@ -1,8 +1,8 @@
-# Radio
+# Tuned
 
 **One channel. No choices. Just listen.**
 
-Radio is a context-aware music player built on Spotify. It reads your moment — time of day, location, movement, weather — and plays music that fits. No playlists. No algorithm you have to train. You press play and the right thing happens.
+Tuned is a context-aware music player built on Spotify. It reads your moment — time of day, location, movement, weather — and plays music that fits. No playlists. No algorithm you have to train. You press play and the right thing happens.
 
 Requires a Spotify Premium account.
 
@@ -23,7 +23,7 @@ radio-mvp/
 
 ### Why is there a separate backend alongside Next.js?
 
-Next.js API routes are stateless — they spin up per request and die immediately. That's fine for simple CRUD, but Radio needs things that don't fit that model:
+Next.js API routes are stateless — they spin up per request and die immediately. That's fine for simple CRUD, but Tuned needs things that don't fit that model:
 
 - **Background workers** (BullMQ) that learn from what you listen to and refresh track pools continuously
 - **Long-lived Redis connections** for caching context vectors, candidate pools, and session state
@@ -90,7 +90,7 @@ NEXT_PUBLIC_APP_URL=http://127.0.0.1:3000
 
 **Backend** (`apps/backend/.env`):
 ```
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/radio
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/tuned
 REDIS_URL=redis://localhost:6379
 SPOTIFY_CLIENT_ID=<same as above>
 SPOTIFY_CLIENT_SECRET=<same as above>
@@ -140,14 +140,14 @@ Open `http://127.0.0.1:3000` in your browser.
 | What | Command | Notes |
 |---|---|---|
 | Everything | `pnpm dev` | Runs both apps in parallel |
-| Frontend only | `pnpm dev --filter=@radio/web-ui` | Port 3000 |
-| Backend only | `pnpm dev --filter=@radio/backend` | Port 3001 |
+| Frontend only | `pnpm dev --filter=@tuned/web-ui` | Port 3000 |
+| Backend only | `pnpm dev --filter=@tuned/backend` | Port 3001 |
 
 ---
 
 ## All commands
 
-### Root level (run from `radio-mvp/`)
+### Root level (run from the repo root)
 
 | Command | What it does |
 |---|---|
@@ -164,12 +164,12 @@ Open `http://127.0.0.1:3000` in your browser.
 
 ```bash
 # Run any script in a specific app
-pnpm --filter=@radio/web-ui <script>
-pnpm --filter=@radio/backend <script>
+pnpm --filter=@tuned/web-ui <script>
+pnpm --filter=@tuned/backend <script>
 
 # Examples
-pnpm --filter=@radio/backend typecheck
-pnpm --filter=@radio/web-ui build
+pnpm --filter=@tuned/backend typecheck
+pnpm --filter=@tuned/web-ui build
 ```
 
 ### Database (must run from `apps/backend/`)

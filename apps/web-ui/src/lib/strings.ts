@@ -4,7 +4,7 @@ export const strings = {
     signIn: "Sign in with Spotify",
     signingIn: "Signing in...",
   },
-  radio: {
+  tuned: {
     tuningIn: "Tuning in...",
     errorTitle: "Something went wrong",
     errorBody: "The music will return. Try refreshing.",
